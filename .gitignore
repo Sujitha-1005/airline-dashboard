@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.env
+*.egg-info/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# data / models (only if you have large files)
+data/*.csv
+models/*.pkl

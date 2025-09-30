@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Airline Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-plane"></i> Airline Performance Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link active" href="/analytics">Analytics</a>
+                <a class="nav-link" href="/predictions">Predictions</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <h2 class="mb-4"><i class="fas fa-chart-line"></i> Deep Dive Analytics</h2>
+
+        <!-- Satisfaction Analysis -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-couch"></i> Satisfaction by Seat Class</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="seatClassChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-mobile-alt"></i> Satisfaction by Check-in Method</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="checkinChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-warning text-white">
+                        <h5><i class="fas fa-suitcase"></i> Satisfaction by Travel Purpose</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="purposeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Analysis -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-dollar-sign"></i> Revenue by Airline</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueAirlineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5><i class="fas fa-dollar-sign"></i> Revenue by Seat Class</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueClassChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Airline Comparison Table -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5><i class="fas fa-table"></i> Detailed Airline Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="airlineTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Airline</th>
+                                        <th>Total Flights</th>
+                                        <th>Avg Satisfaction</th>
+                                        <th>Avg Delay (min)</th>
+                                        <th>Avg Price ($)</th>
+                                        <th>Performance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="airlineTableBody">
+                                    <!-- Data loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Cards -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-lightbulb"></i> Key Insights</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <h6><strong>Customer Satisfaction Drivers:</strong></h6>
+                                    <ul id="satisfactionInsights">
+                                        <li>Loading insights...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <h6><strong>Operational Insights:</strong></h6>
+                                    <ul id="operationalInsights">
+                                        <li>Loading insights...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load satisfaction factors
+        fetch('/api/satisfaction-factors')
+            .then(response => response.json())
+            .then(data => {
+                // Seat Class Chart
+                const seatClassCtx = document.getElementById('seatClassChart').getContext('2d');
+                new Chart(seatClassCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.seat_class),
+                        datasets: [{
+                            label: 'Satisfaction Score',
+                            data: Object.values(data.seat_class),
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 10 }
+                        }
+                    }
+                });
+
+                // Check-in Method Chart
+                const checkinCtx = document.getElementById('checkinChart').getContext('2d');
+                new Chart(checkinCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.check_in),
+                        datasets: [{
+                            label: 'Satisfaction Score',
+                            data: Object.values(data.check_in),
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 10 }
+                        }
+                    }
+                });
+
+                // Travel Purpose Chart
+                const purposeCtx = document.getElementById('purposeChart').getContext('2d');
+                new Chart(purposeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.travel_purpose),
+                        datasets: [{
+                            label: 'Satisfaction Score',
+                            data: Object.values(data.travel_purpose),
+                            backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 10 }
+                        }
+                    }
+                });
+            });
+
+        // Load revenue analysis
+        fetch('/api/revenue-analysis')
+            .then(response => response.json())
+            .then(data => {
+                // Revenue by Airline
+                const revAirlineCtx = document.getElementById('revenueAirlineChart').getContext('2d');
+                new Chart(revAirlineCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(data.by_airline),
+                        datasets: [{
+                            data: Object.values(data.by_airline),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+                // Revenue by Class
+                const revClassCtx = document.getElementById('revenueClassChart').getContext('2d');
+                new Chart(revClassCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(data.by_class),
+                        datasets: [{
+                            data: Object.values(data.by_class),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            });
+
+        // Load airline performance table
+        fetch('/api/airline-performance')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('airlineTableBody');
+                tbody.innerHTML = '';
+                
+                data.forEach(airline => {
+                    const row = tbody.insertRow();
+                    const performance = airline.Avg_Satisfaction >= 7 ? 'Excellent' : 
+                                      airline.Avg_Satisfaction >= 5 ? 'Good' : 'Needs Improvement';
+                    const badgeClass = airline.Avg_Satisfaction >= 7 ? 'success' : 
+                                      airline.Avg_Satisfaction >= 5 ? 'warning' : 'danger';
+                    
+                    row.innerHTML = `
+                        <td><strong>${airline.Airline}</strong></td>
+                        <td>${airline.Total_Flights}</td>
+                        <td>${airline.Avg_Satisfaction.toFixed(2)}</td>
+                        <td>${airline.Avg_Delay.toFixed(1)}</td>
+                        <td>${airline.Avg_Price.toFixed(2)}</td>
+                        <td><span class="badge bg-${badgeClass}">${performance}</span></td>
+                    `;
+                });
+
+                // Generate insights based on data
+                generateInsights(data);
+            });
+
+        // Generate automated insights
+        function generateInsights(airlineData) {
+            // Satisfaction Insights
+            fetch('/api/satisfaction-factors')
+                .then(response => response.json())
+                .then(satisfactionData => {
+                    const seatClasses = satisfactionData.seat_class;
+                    const checkInMethods = satisfactionData.check_in;
+                    
+                    // Find best seat class
+                    const bestSeatClass = Object.keys(seatClasses).reduce((a, b) => 
+                        seatClasses[a] > seatClasses[b] ? a : b
+                    );
+                    
+                    // Find best check-in method
+                    const bestCheckIn = Object.keys(checkInMethods).reduce((a, b) => 
+                        checkInMethods[a] > checkInMethods[b] ? a : b
+                    );
+                    
+                    const satisfactionInsights = document.getElementById('satisfactionInsights');
+                    satisfactionInsights.innerHTML = `
+                        <li><strong>${bestSeatClass}</strong> class has the highest satisfaction score (${seatClasses[bestSeatClass].toFixed(2)}/10)</li>
+                        <li><strong>${bestCheckIn}</strong> check-in method leads to better customer experience</li>
+                        <li>Premium services correlate with ${((seatClasses[bestSeatClass] - seatClasses['Economy']) * 10).toFixed(0)}% higher satisfaction</li>
+                        <li>Mobile and online check-ins show improved customer satisfaction compared to traditional methods</li>
+                    `;
+                });
+
+            // Operational Insights
+            const bestAirline = airlineData.reduce((prev, current) => 
+                (prev.Avg_Satisfaction > current.Avg_Satisfaction) ? prev : current
+            );
+            
+            const worstDelay = airlineData.reduce((prev, current) => 
+                (prev.Avg_Delay > current.Avg_Delay) ? prev : current
+            );
+            
+            const totalFlights = airlineData.reduce((sum, a) => sum + a.Total_Flights, 0);
+            const avgSatisfaction = (airlineData.reduce((sum, a) => sum + a.Avg_Satisfaction, 0) / airlineData.length).toFixed(2);
+            
+            const operationalInsights = document.getElementById('operationalInsights');
+            operationalInsights.innerHTML = `
+                <li><strong>${bestAirline.Airline}</strong> leads in customer satisfaction with ${bestAirline.Avg_Satisfaction.toFixed(2)}/10 rating</li>
+                <li><strong>${worstDelay.Airline}</strong> has the highest average delays (${worstDelay.Avg_Delay.toFixed(1)} minutes) - needs operational improvement</li>
+                <li>Overall network satisfaction is <strong>${avgSatisfaction}/10</strong> across ${totalFlights.toLocaleString()} flights</li>
+                <li>On-time performance is the key driver for customer loyalty and repeat bookings</li>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictions - Airline Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-plane"></i> Airline Performance Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link" href="/analytics">Analytics</a>
+                <a class="nav-link active" href="/predictions">Predictions</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <h2 class="mb-4"><i class="fas fa-robot"></i> AI-Powered Predictions</h2>
+
+        <div class="row">
+            <!-- Delay Prediction -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-white">
+                        <h5><i class="fas fa-clock"></i> Delay Prediction</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="delayForm">
+                            <div class="mb-3">
+                                <label>Airline</label>
+                                <select class="form-select" name="Airline" required>
+                                    <option value="Delta">Delta</option>
+                                    <option value="United">United</option>
+                                    <option value="American Airlines">American Airlines</option>
+                                    <option value="Southwest">Southwest</option>
+                                    <option value="JetBlue">JetBlue</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Flight Duration (min)</label>
+                                <input type="number" class="form-control" name="Flight_Duration_Minutes" value="180" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Distance (miles)</label>
+                                <input type="number" class="form-control" name="Distance_Miles" value="1000" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Weather Impact</label>
+                                <select class="form-select" name="Weather_Impact" required>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Departure Airport</label>
+                                <select class="form-select" name="Departure_Airport" required>
+                                    <option value="JFK">JFK</option>
+                                    <option value="LAX">LAX</option>
+                                    <option value="ORD">ORD</option>
+                                    <option value="ATL">ATL</option>
+                                    <option value="DFW">DFW</option>
+                                    <option value="SEA">SEA</option>
+                                    <option value="SFO">SFO</option>
+                                    <option value="DEN">DEN</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Arrival Airport</label>
+                                <select class="form-select" name="Arrival_Airport" required>
+                                    <option value="ATL">ATL</option>
+                                    <option value="DFW">DFW</option>
+                                    <option value="ORD">ORD</option>
+                                    <option value="JFK">JFK</option>
+                                    <option value="LAX">LAX</option>
+                                    <option value="SEA">SEA</option>
+                                    <option value="SFO">SFO</option>
+                                    <option value="DEN">DEN</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="fas fa-magic"></i> Predict Delay
+                            </button>
+                        </form>
+                        <div id="delayResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Satisfaction Prediction -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-smile"></i> Satisfaction Prediction</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="satisfactionForm">
+                            <div class="mb-3">
+                                <label>Airline</label>
+                                <select class="form-select" name="Airline" required>
+                                    <option value="Delta">Delta</option>
+                                    <option value="United">United</option>
+                                    <option value="American Airlines">American Airlines</option>
+                                    <option value="Southwest">Southwest</option>
+                                    <option value="JetBlue">JetBlue</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Seat Class</label>
+                                <select class="form-select" name="Seat_Class" required>
+                                    <option value="Economy">Economy</option>
+                                    <option value="Premium Economy">Premium Economy</option>
+                                    <option value="Business">Business</option>
+                                    <option value="First">First</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Travel Purpose</label>
+                                <select class="form-select" name="Travel_Purpose" required>
+                                    <option value="Business">Business</option>
+                                    <option value="Leisure">Leisure</option>
+                                    <option value="Family">Family</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Check-in Method</label>
+                                <select class="form-select" name="Check_in_Method" required>
+                                    <option value="Online">Online</option>
+                                    <option value="Mobile App">Mobile App</option>
+                                    <option value="Airport Kiosk">Airport Kiosk</option>
+                                    <option value="Desk">Desk</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Price ($)</label>
+                                <input type="number" class="form-control" name="Price_USD" value="250" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Flight Duration (min)</label>
+                                <input type="number" class="form-control" name="Flight_Duration_Minutes" value="180" required>
+                            </div>
+                            <button type="submit" class="btn btn-info w-100">
+                                <i class="fas fa-magic"></i> Predict Satisfaction
+                            </button>
+                        </form>
+                        <div id="satisfactionResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No-Show Prediction -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="fas fa-user-times"></i> No-Show Risk Prediction</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="noshowForm">
+                            <div class="mb-3">
+                                <label>Booking Days in Advance</label>
+                                <input type="number" class="form-control" name="Booking_Days_In_Advance" value="30" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Price ($)</label>
+                                <input type="number" class="form-control" name="Price_USD" value="250" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Seat Class</label>
+                                <select class="form-select" name="Seat_Class" required>
+                                    <option value="Economy">Economy</option>
+                                    <option value="Premium Economy">Premium Economy</option>
+                                    <option value="Business">Business</option>
+                                    <option value="First">First</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Travel Purpose</label>
+                                <select class="form-select" name="Travel_Purpose" required>
+                                    <option value="Business">Business</option>
+                                    <option value="Leisure">Leisure</option>
+                                    <option value="Family">Family</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Age</label>
+                                <input type="number" class="form-control" name="Age" value="35" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Income Level</label>
+                                <select class="form-select" name="Income_Level" required>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="fas fa-magic"></i> Predict No-Show Risk
+                            </button>
+                        </form>
+                        <div id="noshowResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Helper function to get form data
+        function getFormData(form) {
+            const formData = new FormData(form);
+            const data = {};
+            
+            // Add default values for all required fields
+            data.Gender = 'Male';
+            data.Departure_Airport = data.Departure_Airport || 'JFK';
+            data.Arrival_Airport = data.Arrival_Airport || 'LAX';
+            data.Distance_Miles = parseInt(data.Distance_Miles) || 1000;
+            data.Bags_Checked = 1;
+            data.Seat_Selected = 'Window';
+            data.Weather_Impact = 0;
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = isNaN(value) ? value : parseFloat(value);
+            }
+            return data;
+        }
+
+        // Delay Prediction
+        document.getElementById('delayForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData(e.target);
+            
+            const resultDiv = document.getElementById('delayResult');
+            resultDiv.innerHTML = '<div class="spinner-border text-warning" role="status"></div>';
+            
+            try {
+                const response = await fetch('/api/predict-delay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const pred = result.prediction;
+                    const badgeClass = pred.delay_category === 'Short' ? 'success' : 
+                                      pred.delay_category === 'Medium' ? 'warning' : 'danger';
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-${badgeClass === 'success' ? 'success' : 'warning'}">
+                            <h6><strong>Prediction Result:</strong></h6>
+                            <p class="mb-1"><strong>Expected Delay:</strong> ${pred.predicted_delay_minutes} minutes</p>
+                            <p class="mb-0"><span class="badge bg-${badgeClass}">${pred.delay_category} Delay</span></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        });
+
+        // Satisfaction Prediction
+        document.getElementById('satisfactionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData(e.target);
+            data.Departure_Airport = 'JFK';
+            data.Arrival_Airport = 'LAX';
+            data.Distance_Miles = 1000;
+            data.Gender = 'Male';
+            data.Age = 35;
+            data.Income_Level = 'Medium';
+            data.Bags_Checked = 1;
+            data.Seat_Selected = 'Window';
+            data.Weather_Impact = 0;
+            data.Booking_Days_In_Advance = 30;
+            
+            const resultDiv = document.getElementById('satisfactionResult');
+            resultDiv.innerHTML = '<div class="spinner-border text-info" role="status"></div>';
+            
+            try {
+                const response = await fetch('/api/predict-satisfaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const pred = result.prediction;
+                    const badgeClass = pred.satisfaction_level === 'High' ? 'success' : 
+                                      pred.satisfaction_level === 'Medium' ? 'warning' : 'danger';
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-${badgeClass === 'success' ? 'success' : 'warning'}">
+                            <h6><strong>Prediction Result:</strong></h6>
+                            <p class="mb-1"><strong>Expected Satisfaction:</strong> ${pred.predicted_satisfaction}/10</p>
+                            <p class="mb-0"><span class="badge bg-${badgeClass}">${pred.satisfaction_level} Satisfaction</span></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        });
+
+        // No-Show Prediction
+        document.getElementById('noshowForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData(e.target);
+            data.Airline = 'Delta';
+            data.Departure_Airport = 'JFK';
+            data.Arrival_Airport = 'LAX';
+            data.Flight_Duration_Minutes = 180;
+            data.Distance_Miles = 1000;
+            data.Gender = 'Male';
+            data.Check_in_Method = 'Online';
+            data.Bags_Checked = 1;
+            data.Seat_Selected = 'Window';
+            data.Weather_Impact = 0;
+            
+            const resultDiv = document.getElementById('noshowResult');
+            resultDiv.innerHTML = '<div class="spinner-border text-danger" role="status"></div>';
+            
+            try {
+                const response = await fetch('/api/predict-noshow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const pred = result.prediction;
+                    const badgeClass = pred.risk_level === 'Low' ? 'success' : 
+                                      pred.risk_level === 'Medium' ? 'warning' : 'danger';
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-${badgeClass === 'success' ? 'success' : badgeClass === 'warning' ? 'warning' : 'danger'}">
+                            <h6><strong>Prediction Result:</strong></h6>
+                            <p class="mb-1"><strong>No-Show Probability:</strong> ${pred.noshow_probability}%</p>
+                            <p class="mb-1"><strong>Will No-Show:</strong> ${pred.will_noshow ? 'Yes' : 'No'}</p>
+                            <p class="mb-0"><span class="badge bg-${badgeClass}">${pred.risk_level} Risk</span></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
